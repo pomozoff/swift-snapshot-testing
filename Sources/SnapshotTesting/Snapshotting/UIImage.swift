@@ -158,12 +158,17 @@ private func context(for cgImage: CGImage, data: UnsafeMutableRawPointer? = nil)
 private func diff(_ old: UIImage, _ new: UIImage) -> UIImage {
   let width = max(old.size.width, new.size.width)
   let height = max(old.size.height, new.size.height)
-  let scale = max(old.scale, new.scale)
-  UIGraphicsBeginImageContextWithOptions(CGSize(width: width, height: height), true, scale)
-  new.draw(at: .zero)
-  old.draw(at: .zero, blendMode: .difference, alpha: 1)
-  let differenceImage = UIGraphicsGetImageFromCurrentImageContext()!
-  UIGraphicsEndImageContext()
+
+  let rect = CGRect(x: 0.0, y: 0.0, width: width, height: height)
+  let renderer = UIGraphicsImageRenderer(size: rect.size)
+  let differenceImage = renderer.image { ctx in
+    UIColor.white.set()
+    ctx.fill(rect)
+
+    new.draw(at: .zero, blendMode: .normal, alpha: 1.0)
+    old.draw(at: .zero, blendMode: .difference, alpha: 1.0)
+  }
+
   return differenceImage
 }
 #endif
